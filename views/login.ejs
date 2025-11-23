@@ -81,9 +81,30 @@
                                 </div>
                             </div>
                             <p class="mt-6 text-xs text-zinc-600 max-w-xs mx-auto">
-                                By continuing, you agree to CottageIndustries' Terms of Service and Privacy Policy.
+                                New here? Logging in will automatically create an account for you.
+                                <br><br>
+                                By continuing, you agree to CottageIndustries'
+                                <a href="/tos" class="text-orange-500 hover:text-orange-400 transition-colors">Terms of Service</a>
+                                and
+                                <a href="/privacy" class="text-orange-500 hover:text-orange-400 transition-colors">Privacy Policy</a>.
                             </p>
                         </div>
+
+                        <!-- Onboarding Preview (Hidden functionality for now, visual only) -->
+                        <div class="mt-8 pt-6 border-t border-zinc-800/50 text-left">
+                            <p class="text-xs font-medium text-zinc-400 mb-3">Account Customization</p>
+                            <div class="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800/50 flex items-center gap-3 opacity-75">
+                                <div class="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <div class="text-xs text-zinc-500">
+                                    You can customize your display name and profile picture later in your account settings.
+                                </div>
+                            </div>
+                        </div>
+
                     <% } else { %>
                         <div class="text-center py-8">
                             <div class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 mb-4">

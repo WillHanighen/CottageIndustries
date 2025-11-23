@@ -1,0 +1,94 @@
+<%- include('partials/header') %>
+
+<div class="relative isolate min-h-screen">
+    <!-- Fixed Background -->
+    <div class="fixed inset-0 -z-50">
+        <div class="absolute inset-0 bg-zinc-950"></div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-orange-500/20 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <!-- Vignette -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)] opacity-80 pointer-events-none"></div>
+    </div>
+
+    <div class="max-w-2xl mx-auto px-6 py-24">
+        <div class="mb-12">
+            <h1 class="text-3xl font-bold text-white mb-2">Account Settings</h1>
+            <p class="text-zinc-400">Manage your profile and preferences</p>
+        </div>
+
+        <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-8 shadow-xl">
+            <form action="/account" method="POST" enctype="multipart/form-data" class="space-y-8">
+                <div class="flex items-center gap-6">
+                    <div class="shrink-0 relative group w-20 h-20" style="width: 5rem; height: 5rem;">
+                        <div id="avatar-preview-container" class="w-full h-full" style="width: 100%; height: 100%;">
+                            <% if (user.avatar) { %>
+                                <img id="avatar-preview" src="<%= user.avatar %>" alt="<%= user.username %>" class="w-full h-full rounded-full object-cover border-2 border-zinc-700 group-hover:border-orange-500 transition-colors" style="width: 100%; height: 100%; object-fit: cover;">
+                            <% } else { %>
+                                <div id="avatar-placeholder" class="w-full h-full rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center group-hover:border-orange-500 transition-colors" style="width: 100%; height: 100%;">
+                                    <span class="text-2xl font-medium text-white"><%= (user.username || user.email || '?').charAt(0).toUpperCase() %></span>
+                                </div>
+                                <img id="avatar-preview" src="" alt="Preview" class="w-full h-full rounded-full object-cover border-2 border-zinc-700 group-hover:border-orange-500 transition-colors hidden" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                            <% } %>
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="document.getElementById('avatar-upload').click()">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-white">Profile Picture</h3>
+                        <p class="text-sm text-zinc-500">Upload a new profile picture (JPG, PNG)</p>
+                        <input type="file" id="avatar-upload" name="avatar" accept="image/*" class="mt-2 block w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-zinc-800 file:text-white hover:file:bg-zinc-700" onchange="previewImage(this)">
+                    </div>
+                </div>
+
+                <script>
+                    function previewImage(input) {
+                        const preview = document.getElementById('avatar-preview');
+                        const placeholder = document.getElementById('avatar-placeholder');
+                        
+                        if (input.files && input.files[0]) {
+                            const reader = new FileReader();
+                            
+                            reader.onload = function(e) {
+                                preview.src = e.target.result;
+                                // Use inline styles for display toggle since classList might be fighting with specificity or missing classes
+                                preview.style.display = 'block';
+                                if (placeholder) {
+                                    placeholder.style.display = 'none';
+                                }
+                            }
+                            
+                            reader.readAsDataURL(input.files[0]);
+                        }
+                    }
+                </script>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-zinc-300 mb-1">Display Name</label>
+                        <input type="text" id="username" name="username" value="<%= user.username %>" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors placeholder:text-zinc-700">
+                        <p class="mt-1 text-xs text-zinc-500">This is how you'll appear to others.</p>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-zinc-300 mb-1">Email Address</label>
+                        <input type="email" id="email" value="<%= user.email %>" disabled class="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-500 cursor-not-allowed">
+                        <p class="mt-1 text-xs text-zinc-500">Managed by your login provider (<%= user.provider %>).</p>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-zinc-800">
+                    <button type="submit" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-lg shadow-orange-500/10">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+

@@ -24,12 +24,21 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@types/multer": "^2.0.0",
     "@types/prismjs": "^1.26.5",
+    "@types/uuid": "^11.0.0",
     "better-sqlite3": "^12.4.1",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
-    "prismjs": "^1.30.0"
+    "marked": "^17.0.1",
+    "multer": "^2.0.2",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
+    "passport-google-oauth20": "^2.0.0",
+    "prismjs": "^1.30.0",
+    "sharp": "^0.34.5",
+    "uuid": "^13.0.0"
   }
 }

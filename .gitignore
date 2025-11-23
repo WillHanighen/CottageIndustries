@@ -26,6 +26,10 @@ yarn-debug.log*
 bun-debug.log*
 report.[0-9]_[0-9]_[0-9]_[0-9].json
 
+# Uploads
+public/uploads/avatars/**
+!public/uploads/avatars/.gitkeep
+
 # env files
 .env
 .env.*

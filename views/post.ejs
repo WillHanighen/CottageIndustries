@@ -40,7 +40,7 @@
                     <% } %>
                 </div>
                 
-                <div class="prose prose-invert prose-zinc max-w-none mb-10 text-lg text-zinc-300">
+                <div class="prose prose-invert prose-zinc prose-a:text-orange-500 hover:prose-a:text-orange-400 max-w-none mb-10 text-lg text-zinc-300">
                     <%- marked.parse(post.content) %>
                 </div>
 
@@ -100,7 +100,7 @@
 
             <div class="space-y-8">
                 <% comments.forEach(comment => { %>
-                    <div class="flex gap-4 group">
+                    <div class="flex gap-4 group relative">
                         <div class="shrink-0">
                             <% if (comment.avatar) { %>
                                 <img src="<%= comment.avatar %>" class="w-10 h-10 rounded-full border border-zinc-800">
@@ -111,11 +111,32 @@
                             <% } %>
                         </div>
                         <div class="grow bg-zinc-900/20 p-4 rounded-xl border border-zinc-800/30">
-                            <div class="flex items-baseline gap-3 mb-2">
-                                <span class="font-semibold text-white"><%= comment.username %></span>
-                                <span class="text-xs text-zinc-600"><%= new Date(comment.created_at).toLocaleDateString() %></span>
+                            <div class="flex items-baseline justify-between mb-2">
+                                <div class="flex items-baseline gap-3">
+                                    <span class="font-semibold text-white"><%= comment.username %></span>
+                                    <span class="text-xs text-zinc-600"><%= new Date(comment.created_at).toLocaleDateString() %></span>
+                                </div>
+                                <% if (user && (user.id === comment.user_id || isAdmin)) { %>
+                                    <div class="flex gap-2">
+                                        <% if (user.id === comment.user_id) { %>
+                                            <button type="button" onclick="toggleEdit('<%= comment.id %>')" class="text-xs text-zinc-500 hover:text-white transition-colors">Edit</button>
+                                        <% } %>
+                                        <button type="button" onclick="openDeleteModal('/comments/<%= comment.id %>/delete')" class="text-xs text-zinc-500 hover:text-red-500 transition-colors">Delete</button>
+                                    </div>
+                                <% } %>
                             </div>
-                            <p class="text-zinc-300 text-sm"><%= comment.content %></p>
+                            <div id="comment-content-<%= comment.id %>">
+                                <p class="text-zinc-300 text-sm"><%= comment.content %></p>
+                            </div>
+                            <% if (user && user.id === comment.user_id) { %>
+                                <form id="edit-form-<%= comment.id %>" action="/comments/<%= comment.id %>/edit" method="POST" class="hidden mt-2">
+                                    <textarea name="content" rows="2" required class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white text-sm mb-2 focus:outline-none focus:border-orange-500/50 transition-all"><%= comment.content %></textarea>
+                                    <div class="flex gap-2 justify-end">
+                                        <button type="button" onclick="toggleEdit('<%= comment.id %>')" class="text-xs text-zinc-400 hover:text-white transition-colors">Cancel</button>
+                                        <button type="submit" class="px-4 py-2 bg-white text-zinc-950 hover:bg-zinc-200 font-semibold rounded-lg transition-colors text-xs">Save Changes</button>
+                                    </div>
+                                </form>
+                            <% } %>
                         </div>
                     </div>
                 <% }); %>
@@ -123,5 +144,18 @@
         </section>
     </article>
 </div>
+
+<%- include('partials/delete_modal') %>
+
+<script>
+function toggleEdit(commentId) {
+    const content = document.getElementById(`comment-content-${commentId}`);
+    const form = document.getElementById(`edit-form-${commentId}`);
+    if (content && form) {
+        content.classList.toggle('hidden');
+        form.classList.toggle('hidden');
+    }
+}
+</script>
 
 <%- include('partials/footer') %>

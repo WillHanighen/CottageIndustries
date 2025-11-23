@@ -1,12 +1,21 @@
     </main>
-    <footer class="border-t border-zinc-800 bg-zinc-900 py-8 mt-12">
-        <div class="max-w-6xl mx-auto px-6 text-center text-zinc-500 text-sm">
-            <p>&copy; <%= new Date().getFullYear() %> CottageIndustries. Built with Bun & Tailwind.</p>
+    <footer class="border-t border-zinc-800 bg-zinc-900 py-8 mt-12 relative z-50">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-zinc-500">
+            <p>&copy; <%= new Date().getFullYear() %> <span class="text-white">Cottage</span><span class="text-orange-500">Industries</span>.</p>
+            
+            <div class="hidden md:block w-px h-4 bg-zinc-700"></div>
+
+            <div class="flex gap-6 flex-wrap justify-center">
+                <a href="/tos" class="hover:text-zinc-300 transition-colors">Terms of Service</a>
+                <a href="/privacy" class="hover:text-zinc-300 transition-colors">Privacy Policy</a>
+                <a href="/about" class="hover:text-zinc-300 transition-colors">About</a>
+            </div>
         </div>
     </footer>
     <script src="/js/prism.js"></script>
     <script src="/js/prism-autoloader.js" data-autoloader-path="/js/components/"></script>
     <script src="/js/prism-toolbar.js"></script>
+    <script src="/js/prism-copy-to-clipboard.min.js"></script>
     <script src="/js/prism-show-language.js"></script>
 </body>
 </html>

@@ -1,0 +1,75 @@
+<!-- TOS Acceptance Modal -->
+<% if (typeof showTosModal !== 'undefined' && showTosModal) { %>
+<div class="fixed inset-0 flex items-center justify-center px-4" style="z-index: 9999;">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+    
+    <!-- Modal -->
+    <div class="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" style="z-index: 10000;">
+        <div class="p-6 sm:p-8 overflow-y-auto">
+            <div class="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mb-6 border border-orange-500/20">
+                <svg class="w-6 h-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-white mb-2">Terms Update Required</h2>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+                We've updated our <a href="/tos" target="_blank" class="text-orange-500 hover:text-orange-400 underline">Terms of Service</a> and <a href="/privacy" target="_blank" class="text-orange-500 hover:text-orange-400 underline">Privacy Policy</a>. 
+                To continue using CottageIndustries, please review and accept the updated terms.
+            </p>
+
+            <div class="bg-zinc-950 rounded-xl p-4 border border-zinc-800 mb-8">
+                <ul class="space-y-3 text-sm text-zinc-400">
+                    <li class="flex gap-3">
+                        <svg class="w-5 h-5 text-zinc-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Clarified data collection policies regarding user accounts and profiles.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <svg class="w-5 h-5 text-zinc-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Updated user conduct guidelines for community interactions.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <form action="/accept-tos" method="POST" class="w-full">
+                    <button type="submit" class="w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-orange-500/10">
+                        I Accept
+                    </button>
+                </form>
+                
+                <button onclick="document.getElementById('delete-confirm').classList.remove('hidden')" class="w-full py-3 px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white font-medium rounded-xl transition-colors border border-zinc-700">
+                    Decline & Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Overlay -->
+<div id="delete-confirm" class="hidden fixed inset-0 items-center justify-center px-4" style="z-index: 10001;">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
+    <div class="relative w-full max-w-md bg-zinc-900 border border-red-900/50 rounded-2xl shadow-2xl p-6 sm:p-8" style="z-index: 10002;">
+        <h3 class="text-xl font-bold text-white mb-2">Are you sure?</h3>
+        <p class="text-zinc-400 text-sm mb-6">
+            Declining the terms will permanently delete your account and all associated data (comments, reactions, profile). This action cannot be undone.
+        </p>
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('delete-confirm').classList.add('hidden')" class="flex-1 py-2.5 px-4 bg-zinc-800 text-white font-medium rounded-lg hover:bg-zinc-700 transition-colors">
+                Cancel
+            </button>
+            <form action="/delete-account" method="POST" class="flex-1">
+                <button type="submit" class="w-full py-2.5 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-medium rounded-lg border border-red-500/20 transition-colors">
+                    Confirm Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+<% } %>
+

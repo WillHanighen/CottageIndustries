@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+
+<!-- Fixed Background -->
+<div class="fixed inset-0 -z-50">
+    <div class="absolute inset-0 bg-zinc-950"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-orange-500/20 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+    <!-- Vignette -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)] opacity-80 pointer-events-none"></div>
+</div>
+
+<main class="max-w-4xl mx-auto px-6 py-24">
+    <h1 class="text-4xl font-bold text-white mb-8">Privacy Policy</h1>
+    <div class="prose prose-invert prose-orange max-w-none">
+        <p class="text-zinc-400 mb-6">Last Updated: <%= new Date().toLocaleDateString() %></p>
+
+        <h2>1. Introduction</h2>
+        <p>CottageIndustries ("we," "us," or "our") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, and disclose information about you when you use our website (the "Service").</p>
+
+        <h2>2. Information We Collect</h2>
+        <p>We may collect the following types of information:</p>
+        <ul>
+            <li><strong>Information you provide:</strong> When you create an account, comment on posts, or contact us, we may collect personal information such as your name, email address, and any other information you choose to provide. This includes your custom display name and profile picture if you choose to upload one.</li>
+            <li><strong>Automatically collected information:</strong> We may automatically collect information about your device and usage of the Service, such as your IP address, browser type, operating system, and page views.</li>
+            <li><strong>Cookies:</strong> We use cookies and similar technologies to enhance your experience and analyze usage of the Service. You can control cookies through your browser settings.</li>
+        </ul>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>We may use your information for the following purposes:</p>
+        <ul>
+            <li>To provide and maintain the Service;</li>
+            <li>To personalize your experience;</li>
+            <li>To communicate with you about the Service, including updates and promotions;</li>
+            <li>To monitor and analyze usage and trends;</li>
+            <li>To detect and prevent fraud and security issues.</li>
+        </ul>
+
+        <h2>4. Sharing of Information</h2>
+        <p>We do not sell your personal information. We may share your information in the following circumstances:</p>
+        <ul>
+            <li>With service providers who assist us in operating the Service;</li>
+            <li>To comply with legal obligations or protect our rights;</li>
+            <li>In connection with a merger, acquisition, or sale of assets.</li>
+        </ul>
+
+        <h2>5. Data Security</h2>
+        <p>We take reasonable measures to protect your personal information from unauthorized access, use, or disclosure. However, no method of transmission over the internet or electronic storage is 100% secure.</p>
+
+        <h2>6. Third-Party Links</h2>
+        <p>The Service may contain links to third-party websites. We are not responsible for the privacy practices or content of such websites.</p>
+
+        <h2>7. Children's Privacy</h2>
+        <p>The Service is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
+
+        <h2>8. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+
+        <h2>9. Contact Us</h2>
+        <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:privacy@cottageindustries.com" class="text-orange-500 hover:text-orange-400">privacy@cottageindustries.com</a>.</p>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
+

@@ -1,0 +1,61 @@
+<%- include('partials/header') %>
+
+<!-- Fixed Background -->
+<div class="fixed inset-0 -z-50">
+    <div class="absolute inset-0 bg-zinc-950"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-orange-500/20 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+    <!-- Vignette -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)] opacity-80 pointer-events-none"></div>
+</div>
+
+<main class="max-w-4xl mx-auto px-6 py-24">
+    <h1 class="text-4xl font-bold text-white mb-8">Terms of Service</h1>
+    <div class="prose prose-invert prose-orange max-w-none">
+        <p class="text-zinc-400 mb-6">Last Updated: <%= new Date().toLocaleDateString() %></p>
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>By accessing and using the CottageIndustries website (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not use the Service.</p>
+
+        <h2>2. Description of Service</h2>
+        <p>CottageIndustries provides a platform for showcasing personal projects, experiments, and thoughts on technology. The Service is provided "as is" and "as available" without warranties of any kind, either express or implied.</p>
+
+        <h2>3. User Accounts</h2>
+        <p>When you create an account with us, you guarantee that the information you provide us is accurate, complete, and current at all times. Inaccurate, incomplete, or obsolete information may result in the immediate termination of your account on the Service.</p>
+        <p>You are responsible for maintaining the confidentiality of your account and password, including but not limited to the restriction of access to your computer and/or account. You agree to accept responsibility for any and all activities or actions that occur under your account and/or password.</p>
+        <p>You can customize your profile with a display name and profile picture. You agree that any content you upload, including your profile picture and display name, will comply with our User Conduct standards.</p>
+
+        <h2>4. User Conduct</h2>
+        <p>You agree not to use the Service for any unlawful purpose or in any way that could damage, disable, overburden, or impair the Service. Specifically, you agree not to:</p>
+        <ul>
+            <li>Harass, abuse, or harm another person or group;</li>
+            <li>Post any content that is defamatory, obscene, or offensive;</li>
+            <li>Attempt to gain unauthorized access to any part of the Service;</li>
+            <li>Use any automated means to access the Service without permission.</li>
+        </ul>
+
+        <h2>4. Intellectual Property</h2>
+        <p>All content provided on the Service, including text, graphics, logos, and code, is the property of CottageIndustries or its licensors and is protected by copyright and other intellectual property laws.</p>
+
+        <h2>5. Disclaimer of Warranties</h2>
+        <p>THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. COTTAGEINDUSTRIES MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, REGARDING THE OPERATION OF THE SERVICE OR THE INFORMATION, CONTENT, OR MATERIALS INCLUDED ON THE SERVICE. TO THE FULL EXTENT PERMISSIBLE BY APPLICABLE LAW, COTTAGEINDUSTRIES DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</p>
+
+        <h2>6. Limitation of Liability</h2>
+        <p>IN NO EVENT SHALL COTTAGEINDUSTRIES BE LIABLE FOR ANY DAMAGES OF ANY KIND ARISING FROM THE USE OF THE SERVICE, INCLUDING, BUT NOT LIMITED TO, DIRECT, INDIRECT, INCIDENTAL, PUNITIVE, AND CONSEQUENTIAL DAMAGES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+
+        <h2>7. Indemnification</h2>
+        <p>You agree to indemnify, defend, and hold harmless CottageIndustries from and against any and all claims, liabilities, damages, losses, and expenses, including reasonable attorneys' fees, arising out of or in any way connected with your access to or use of the Service or your violation of these Terms.</p>
+
+        <h2>8. Modifications to Terms</h2>
+        <p>CottageIndustries reserves the right to modify these Terms at any time. Your continued use of the Service after any such changes constitutes your acceptance of the new Terms.</p>
+
+        <h2>9. Governing Law</h2>
+        <p>These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which CottageIndustries operates, without regard to its conflict of law provisions.</p>
+
+        <h2>10. Contact Us</h2>
+        <p>If you have any questions about these Terms, please contact us at <a href="mailto:legal@cottageindustries.com" class="text-orange-500 hover:text-orange-400">legal@cottageindustries.com</a>.</p>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
+
