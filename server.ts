@@ -10,6 +10,9 @@ import multer from 'multer';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 import db from './database';
 
 dotenv.config();
@@ -17,6 +20,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+
+// Security & Performance Middleware
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1); // Trust first proxy
+}
+
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabled for EJS compatibility
+}));
+app.use(compression());
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+app.use(limiter);
 
 // Configure Multer
 const storage = multer.memoryStorage();
@@ -162,7 +183,12 @@ app.set('view engine', 'ejs');
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret_key',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 app.use(passport.initialize());
 app.use(passport.session());

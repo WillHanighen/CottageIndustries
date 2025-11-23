@@ -1,6 +1,8 @@
 import { Database } from 'bun:sqlite';
+import path from 'path';
 
-const db = new Database('database.db');
+const dbPath = process.env.DB_PATH || path.join(process.cwd(), 'database.db');
+const db = new Database(dbPath);
 
 // Initialize Tables
 db.run(`
