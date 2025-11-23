@@ -32,8 +32,8 @@ app.use(helmet({
 app.use(compression());
 
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    windowMs: 5 * 60 * 1000, // 15 minutes
+    limit: 1000, // Limit each IP to 1000 requests per `window` (here, per 15 minutes)
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
@@ -321,6 +321,8 @@ app.post('/comments', requireAuth, (req, res) => {
 
 app.post('/comments/:id/delete', requireAuth, (req, res) => {
     const commentId = req.params.id;
+    if (!commentId) return res.status(400).send('Comment ID required');
+    
     const userId = (req.user as User).id;
     const isAdminUser = isAdmin(req);
 
@@ -344,6 +346,8 @@ app.post('/comments/:id/delete', requireAuth, (req, res) => {
 
 app.post('/comments/:id/edit', requireAuth, (req, res) => {
     const commentId = req.params.id;
+    if (!commentId) return res.status(400).send('Comment ID required');
+    
     const userId = (req.user as User).id;
     const { content } = req.body;
 
@@ -487,6 +491,7 @@ app.post('/blog/:id/edit', requireAdmin, (req, res) => {
 
 app.post('/blog/:id/delete', requireAdmin, (req, res) => {
     const postId = req.params.id;
+    if (!postId) return res.status(400).send('Post ID required');
     
     // Delete related data
     db.query('DELETE FROM comments WHERE post_id = ?').run(postId);
@@ -513,6 +518,7 @@ app.post('/projects/:id/edit', requireAdmin, (req, res) => {
 
 app.post('/projects/:id/delete', requireAdmin, (req, res) => {
     const projectId = req.params.id;
+    if (!projectId) return res.status(400).send('Project ID required');
     
     // Delete related data
     db.query('DELETE FROM comments WHERE project_id = ?').run(projectId);
