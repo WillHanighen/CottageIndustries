@@ -1,0 +1,125 @@
+<%- include('partials/header') %>
+
+<!-- Fixed Background -->
+<div class="fixed inset-0 -z-50">
+    <div class="absolute inset-0 bg-zinc-950"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-orange-500/20 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+    <!-- Vignette -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)] opacity-80 pointer-events-none"></div>
+</div>
+
+<!-- Hero Section -->
+<section class="relative py-32 lg:py-48 overflow-hidden">
+    <div class="relative max-w-6xl mx-auto px-6 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/50 border border-zinc-800 text-zinc-400 text-xs font-medium mb-8 backdrop-blur-md">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+            Welcome to my digital garden
+        </div>
+        <h1 class="text-5xl md:text-7xl font-bold text-white mb-8 tracking-tight leading-tight">
+            Building <span class="text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-amber-500">the Future</span>,<br>
+            One Line at a Time.
+        </h1>
+        <p class="text-xl text-zinc-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+            A showcase of personal projects, experiments, and thoughts on technology. 
+            Exploring the intersection of code, design, and creativity.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="#projects" class="px-8 py-4 bg-white text-zinc-950 hover:bg-zinc-200 font-semibold rounded-xl transition-all shadow-lg shadow-orange-900/5">
+                View Projects
+            </a>
+            <a href="#blog" class="px-8 py-4 bg-zinc-900/50 hover:bg-zinc-900 text-white font-semibold rounded-xl transition-all border border-zinc-800 hover:border-zinc-700 backdrop-blur-sm">
+                Read Blog
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Projects Section -->
+<section id="projects" class="py-32 relative">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-end justify-between mb-16">
+            <div>
+                <h2 class="text-3xl font-bold text-white mb-4">Featured Projects</h2>
+                <p class="text-zinc-400 max-w-md">A collection of applications, tools, and experiments I've built.</p>
+            </div>
+            <a href="/projects" class="hidden md:inline-flex items-center text-sm font-medium text-orange-500 hover:text-orange-400 transition-colors">
+                View all <svg class="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <% if (projects.length === 0) { %>
+                <div class="col-span-full text-center py-24 border border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
+                    <div class="w-16 h-16 bg-zinc-900 rounded-2xl border border-zinc-800 flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    </div>
+                    <p class="text-zinc-500">No projects showcased yet.</p>
+                </div>
+            <% } %>
+            
+            <% projects.forEach(project => { %>
+                <article class="group bg-zinc-900/40 backdrop-blur-sm border border-zinc-800/50 rounded-3xl overflow-hidden hover:border-orange-500/30 transition-all duration-500 hover:-translate-y-2 shadow-2xl shadow-black/20">
+                    <% if (project.image) { %>
+                        <div class="aspect-video bg-zinc-800 overflow-hidden relative">
+                            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+                            <img src="<%= project.image %>" alt="<%= project.title %>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                    <% } else { %>
+                        <div class="aspect-video bg-zinc-800/50 flex items-center justify-center text-zinc-700 border-b border-zinc-800/50">
+                            <svg class="w-12 h-12 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                    <% } %>
+                    <div class="p-8">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-orange-500 transition-colors"><%= project.title %></h3>
+                        <p class="text-zinc-400 text-sm mb-6 line-clamp-2 leading-relaxed"><%= project.description %></p>
+                        <a href="/projects/<%= project.id %>" class="inline-flex items-center text-sm font-semibold text-white bg-zinc-800 hover:bg-orange-600 px-4 py-2 rounded-lg transition-all">
+                            View Project
+                        </a>
+                    </div>
+                </article>
+            <% }); %>
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section id="blog" class="py-32 bg-zinc-900/20 border-t border-zinc-800/50">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-white mb-4">Latest Thoughts</h2>
+            <p class="text-zinc-400">Musings on software development, design, and more.</p>
+        </div>
+        
+        <div class="space-y-6">
+            <% if (posts.length === 0) { %>
+                <div class="text-center py-24 border border-dashed border-zinc-800 rounded-3xl">
+                    <p class="text-zinc-500">No blog posts yet.</p>
+                </div>
+            <% } %>
+
+            <% posts.forEach(post => { %>
+                <article class="group bg-zinc-900/40 backdrop-blur-sm border border-zinc-800/50 rounded-2xl p-8 hover:border-orange-500/30 transition-all duration-300 hover:bg-zinc-900/60">
+                    <div class="flex flex-col md:flex-row md:items-center gap-6">
+                        <div class="grow">
+                            <div class="flex items-center gap-3 text-xs font-medium text-zinc-500 mb-3 uppercase tracking-wider">
+                                <time><%= new Date(post.created_at).toLocaleDateString() %></time>
+                                <span class="w-1 h-1 bg-zinc-700 rounded-full"></span>
+                                <span>Blog</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-orange-500 transition-colors"><%= post.title %></h3>
+                            <p class="text-zinc-400 line-clamp-2 mb-4"><%= post.content.replace(/<[^>]*>/g, '') %></p>
+                        </div>
+                        <div class="shrink-0">
+                            <a href="/blog/<%= post.id %>" class="inline-flex items-center justify-center w-12 h-12 rounded-full border border-zinc-700 text-zinc-400 group-hover:border-orange-500 group-hover:text-orange-500 transition-all bg-zinc-900">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            <% }); %>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

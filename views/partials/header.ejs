@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CottageIndustries</title>
+    <link href="/css/output.css" rel="stylesheet">
+</head>
+<body class="bg-zinc-950 text-zinc-300 font-sans antialiased min-h-screen flex flex-col">
+    <nav class="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/" class="text-xl font-bold text-zinc-100 tracking-tighter hover:text-orange-500 transition-colors">
+                Cottage<span class="text-orange-500">Industries</span>
+            </a>
+            <div class="flex gap-6 text-sm font-medium">
+                <a href="/" class="hover:text-white transition-colors">Home</a>
+                <a href="/#projects" class="hover:text-white transition-colors">Projects</a>
+                <a href="/#blog" class="hover:text-white transition-colors">Blog</a>
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                        <a href="/admin" class="text-orange-500 hover:text-orange-400">Admin</a>
+                    <% } %>
+                    <a href="/logout" class="hover:text-white">Logout</a>
+                <% } else { %>
+                    <a href="/login" class="hover:text-white">Login</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+    <main class="flex-grow">

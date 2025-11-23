@@ -1,0 +1,130 @@
+<%- include('partials/header') %>
+
+<div class="relative isolate">
+    <!-- Fixed Background -->
+    <div class="fixed inset-0 -z-50">
+        <div class="absolute inset-0 bg-zinc-950"></div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-orange-500/10 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <!-- Vignette -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)] opacity-80 pointer-events-none"></div>
+    </div>
+
+    <article class="max-w-4xl mx-auto px-6 py-12 sm:py-20">
+        <header class="mb-12 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/50 border border-zinc-800 text-zinc-400 text-xs font-medium mb-8 backdrop-blur-md">
+                <time datetime="<%= post.created_at %>"><%= new Date(post.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) %></time>
+                <span class="w-1 h-1 bg-zinc-700 rounded-full"></span>
+                <span>Blog</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tight leading-tight"><%= post.title %></h1>
+            
+            <% if (isAdmin) { %>
+                <div class="mb-8">
+                    <a href="/blog/<%= post.id %>/edit" class="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-400 hover:text-orange-500 hover:border-orange-500/50 transition-all">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        Edit Post
+                    </a>
+                </div>
+            <% } %>
+
+            <% if (post.image) { %>
+                <div class="relative rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl shadow-black/50 mb-16 group">
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-900/50 to-transparent opacity-60"></div>
+                    <img src="<%= post.image %>" alt="<%= post.title %>" class="w-full object-cover max-h-[500px]">
+                </div>
+            <% } else { %>
+                <hr class="border-zinc-800/50 max-w-xs mx-auto mb-16">
+            <% } %>
+        </header>
+
+        <div class="prose prose-invert prose-lg prose-zinc max-w-none mb-16 prose-headings:text-white prose-a:text-orange-500 hover:prose-a:text-orange-400 prose-strong:text-white prose-code:text-orange-200 prose-pre:bg-zinc-900/50 prose-pre:border prose-pre:border-zinc-800/50">
+            <%- marked.parse(post.content) %>
+        </div>
+
+        <div class="flex items-center justify-between py-8 border-t border-zinc-800 mb-16">
+            <div class="flex items-center gap-4">
+                <form action="/reactions" method="POST">
+                    <input type="hidden" name="target_id" value="<%= post.id %>">
+                    <input type="hidden" name="target_type" value="post">
+                    <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-xl transition-all group">
+                        <svg class="w-5 h-5 text-zinc-500 group-hover:text-red-500 transition-colors" fill="<%= reactionCount > 0 ? 'currentColor' : 'none' %>" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span class="font-semibold text-white group-hover:text-red-500 transition-colors"><%= reactionCount %></span>
+                    </button>
+                </form>
+                <span class="text-sm text-zinc-500">Liked this post? Give it a heart!</span>
+            </div>
+            
+            <!-- Share buttons could go here -->
+        </div>
+
+        <section class="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-8 sm:p-10 backdrop-blur-sm">
+            <h3 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                Comments <span class="text-sm font-normal text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full"><%= comments.length %></span>
+            </h3>
+            
+            <% if (user) { %>
+                <form action="/comments" method="POST" class="mb-12">
+                    <input type="hidden" name="post_id" value="<%= post.id %>">
+                    <div class="flex gap-4 items-start">
+                        <div class="shrink-0">
+                            <% if (user.avatar) { %>
+                                <img src="<%= user.avatar %>" class="w-10 h-10 rounded-full border border-zinc-700">
+                            <% } else { %>
+                                <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-white font-bold">
+                                    <%= (user.username || user.email || '?').charAt(0).toUpperCase() %>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="grow space-y-3">
+                            <textarea name="content" rows="3" placeholder="What are your thoughts?" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-all resize-none placeholder:text-zinc-600"></textarea>
+                            <div class="flex justify-end">
+                                <button type="submit" class="px-6 py-2.5 bg-white text-zinc-950 hover:bg-zinc-200 font-semibold rounded-lg transition-colors text-sm">
+                                    Post Comment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            <% } else { %>
+                <div class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-8 mb-12 text-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[url('/images/grid.svg')] opacity-[0.02]"></div>
+                    <p class="text-zinc-400 mb-6">Join the discussion by signing in.</p>
+                    <a href="/login" class="inline-flex items-center gap-2 px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-lg transition-colors text-sm border border-zinc-700">
+                        Sign in to comment
+                    </a>
+                </div>
+            <% } %>
+
+            <div class="space-y-8">
+                <% comments.forEach(comment => { %>
+                    <div class="flex gap-4 group">
+                        <div class="shrink-0">
+                            <% if (comment.avatar) { %>
+                                <img src="<%= comment.avatar %>" class="w-10 h-10 rounded-full border border-zinc-800">
+                            <% } else { %>
+                                <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 font-bold text-sm">
+                                    <%= (comment.username || '?').charAt(0).toUpperCase() %>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="grow">
+                            <div class="flex items-baseline gap-3 mb-1">
+                                <span class="font-semibold text-white"><%= comment.username %></span>
+                                <span class="text-xs text-zinc-600"><%= new Date(comment.created_at).toLocaleDateString() %></span>
+                            </div>
+                            <div class="prose prose-invert prose-sm max-w-none text-zinc-300 group-hover:text-zinc-200 transition-colors">
+                                <p><%= comment.content %></p>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </section>
+    </article>
+</div>
+
+<%- include('partials/footer') %>

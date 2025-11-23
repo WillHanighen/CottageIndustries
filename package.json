@@ -1,0 +1,32 @@
+{
+  "name": "cottageindustries",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun server.ts",
+    "dev": "bun --watch server.ts",
+    "build:css": "bunx tailwindcss -i ./public/css/styles.css -o ./public/css/output.css --watch",
+    "build:css:once": "bunx tailwindcss -i ./public/css/styles.css -o ./public/css/output.css"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.17",
+    "@types/bun": "latest",
+    "@types/express": "^5.0.5",
+    "@types/express-session": "^1.18.2",
+    "@types/node": "^24.10.1",
+    "@types/passport": "^1.0.17",
+    "@types/passport-github2": "^1.2.9",
+    "@types/passport-google-oauth20": "^2.0.17"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2"
+  }
+}
