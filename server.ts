@@ -197,6 +197,7 @@ app.use(passport.session());
 app.use((req, res, next) => {
     res.locals.user = req.user;
     res.locals.isAdmin = req.user && (req.user as any).email === process.env.ADMIN_EMAIL;
+    res.locals.currentUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
     // Check for TOS acceptance
     if (req.user && req.path !== '/accept-tos' && req.path !== '/delete-account' && req.path !== '/logout' && !req.path.startsWith('/css') && !req.path.startsWith('/js')) {
@@ -244,12 +245,24 @@ app.get('/', (req, res) => {
 
 app.get('/blog', (req, res) => {
     const posts = db.query('SELECT * FROM posts ORDER BY created_at DESC').all();
-    res.render('blog_list', { posts, user: req.user, isAdmin: isAdmin(req) });
+    res.render('blog_list', { 
+        posts, 
+        user: req.user, 
+        isAdmin: isAdmin(req),
+        title: 'Blog',
+        description: 'Read the latest thoughts and tutorials on web development, design, and technology.'
+    });
 });
 
 app.get('/projects', (req, res) => {
     const projects = db.query('SELECT * FROM projects ORDER BY featured DESC, created_at DESC').all();
-    res.render('project_list', { projects, user: req.user, isAdmin: isAdmin(req) });
+    res.render('project_list', { 
+        projects, 
+        user: req.user, 
+        isAdmin: isAdmin(req),
+        title: 'Projects',
+        description: 'Explore a collection of my personal projects, open source contributions, and experiments.'
+    });
 });
 
 // Auth Routes
@@ -258,7 +271,8 @@ app.get('/login', (req, res) => {
         user: req.user,
         googleEnabled: !!process.env.GOOGLE_CLIENT_ID,
         githubEnabled: !!process.env.GITHUB_CLIENT_ID,
-        adminEmail: ADMIN_EMAIL
+        adminEmail: ADMIN_EMAIL,
+        title: 'Login'
     });
 });
 
@@ -290,19 +304,45 @@ app.get('/logout', (req, res) => {
 
 // Content Routes
 app.get('/blog/:id', (req, res) => {
-    const post = db.query('SELECT * FROM posts WHERE id = ?').get(req.params.id);
+    const post = db.query('SELECT * FROM posts WHERE id = ?').get(req.params.id) as any;
     if (!post) return res.status(404).send('Post not found');
     const comments = db.query('SELECT comments.*, users.username, users.avatar FROM comments JOIN users ON comments.user_id = users.id WHERE post_id = ? ORDER BY created_at DESC').all(req.params.id);
     const reactionCount = (db.query('SELECT COUNT(*) as count FROM reactions WHERE target_id = ? AND target_type = ?').get(req.params.id, 'post') as any).count;
-    res.render('post', { post, comments, reactionCount, user: req.user, isAdmin: isAdmin(req) });
+    
+    const description = (marked.parse(post.content) as string).replace(/<[^>]*>/g, '').substring(0, 160).replace(/\s+/g, ' ').trim();
+    
+    res.render('post', { 
+        post, 
+        comments, 
+        reactionCount, 
+        user: req.user, 
+        isAdmin: isAdmin(req),
+        title: post.title,
+        description,
+        image: post.image,
+        type: 'article'
+    });
 });
 
 app.get('/projects/:id', (req, res) => {
-    const project = db.query('SELECT * FROM projects WHERE id = ?').get(req.params.id);
+    const project = db.query('SELECT * FROM projects WHERE id = ?').get(req.params.id) as any;
     if (!project) return res.status(404).send('Project not found');
     const comments = db.query('SELECT comments.*, users.username, users.avatar FROM comments JOIN users ON comments.user_id = users.id WHERE project_id = ? ORDER BY created_at DESC').all(req.params.id);
     const reactionCount = (db.query('SELECT COUNT(*) as count FROM reactions WHERE target_id = ? AND target_type = ?').get(req.params.id, 'project') as any).count;
-    res.render('project', { project, comments, reactionCount, user: req.user, isAdmin: isAdmin(req) });
+    
+    const description = (marked.parse(project.description) as string).replace(/<[^>]*>/g, '').substring(0, 160).replace(/\s+/g, ' ').trim();
+    
+    res.render('project', { 
+        project, 
+        comments, 
+        reactionCount, 
+        user: req.user, 
+        isAdmin: isAdmin(req),
+        title: project.title,
+        description,
+        image: project.image,
+        type: 'article'
+    });
 });
 
 // Comments & Reactions
@@ -386,7 +426,7 @@ app.post('/reactions', requireAuth, (req, res) => {
 // Account Routes
 app.get('/account', (req, res) => {
     if (!req.user) return res.redirect('/login');
-    res.render('account', { user: req.user, isAdmin: isAdmin(req) });
+    res.render('account', { user: req.user, isAdmin: isAdmin(req), title: 'Account' });
 });
 
 app.post('/account', requireAuth, upload.single('avatar'), async (req, res) => {
@@ -443,16 +483,75 @@ app.post('/delete-account', requireAuth, (req, res) => {
 });
 
 // Static Pages
+app.get('/sitemap.xml', (req, res) => {
+    const posts = db.query('SELECT id, created_at FROM posts').all() as any[];
+    const projects = db.query('SELECT id, created_at FROM projects').all() as any[];
+    
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    
+    interface SitemapUrl {
+        url: string;
+        changefreq: string;
+        priority: number;
+        lastmod?: string;
+    }
+
+    const urls: SitemapUrl[] = [
+        { url: '/', changefreq: 'daily', priority: 1.0 },
+        { url: '/blog', changefreq: 'daily', priority: 0.8 },
+        { url: '/projects', changefreq: 'weekly', priority: 0.8 },
+        { url: '/about', changefreq: 'monthly', priority: 0.5 },
+        { url: '/privacy', changefreq: 'yearly', priority: 0.3 },
+        { url: '/tos', changefreq: 'yearly', priority: 0.3 },
+        { url: '/login', changefreq: 'monthly', priority: 0.3 },
+    ];
+
+    // Add Blog Posts
+    posts.forEach(post => {
+        urls.push({
+            url: `/blog/${post.id}`,
+            changefreq: 'weekly',
+            priority: 0.7,
+            lastmod: new Date(post.created_at).toISOString()
+        });
+    });
+
+    // Add Projects
+    projects.forEach(project => {
+        urls.push({
+            url: `/projects/${project.id}`,
+            changefreq: 'weekly',
+            priority: 0.7,
+            lastmod: new Date(project.created_at).toISOString()
+        });
+    });
+
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    ${urls.map(u => `
+    <url>
+        <loc>${baseUrl}${u.url}</loc>
+        <changefreq>${u.changefreq}</changefreq>
+        <priority>${u.priority}</priority>
+        ${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}
+    </url>
+    `).join('')}
+</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.send(sitemap);
+});
+
 app.get('/tos', (req, res) => {
-    res.render('tos', { user: req.user, isAdmin: isAdmin(req) });
+    res.render('tos', { user: req.user, isAdmin: isAdmin(req), title: 'Terms of Service' });
 });
 
 app.get('/privacy', (req, res) => {
-    res.render('privacy', { user: req.user, isAdmin: isAdmin(req) });
+    res.render('privacy', { user: req.user, isAdmin: isAdmin(req), title: 'Privacy Policy' });
 });
 
 app.get('/about', (req, res) => {
-    res.render('about', { user: req.user, isAdmin: isAdmin(req) });
+    res.render('about', { user: req.user, isAdmin: isAdmin(req), title: 'About' });
 });
 
 // Admin Routes
@@ -460,7 +559,7 @@ app.get('/admin', (req, res) => {
     if (!isAdmin(req)) return res.redirect('/');
     const posts = db.query('SELECT * FROM posts ORDER BY created_at DESC').all();
     const projects = db.query('SELECT * FROM projects ORDER BY created_at DESC').all();
-    res.render('admin', { posts, projects, user: req.user });
+    res.render('admin', { posts, projects, user: req.user, title: 'Admin Dashboard' });
 });
 
 app.post('/admin/post', requireAdmin, (req, res) => {
@@ -480,7 +579,7 @@ app.post('/admin/project', requireAdmin, (req, res) => {
 app.get('/blog/:id/edit', (req, res) => {
     if (!isAdmin(req)) return res.redirect('/');
     const post = db.query('SELECT * FROM posts WHERE id = ?').get(req.params.id);
-    res.render('edit', { item: post, type: 'post', user: req.user });
+    res.render('edit', { item: post, type: 'post', user: req.user, title: 'Edit Post' });
 });
 
 app.post('/blog/:id/edit', requireAdmin, (req, res) => {
@@ -506,7 +605,7 @@ app.post('/blog/:id/delete', requireAdmin, (req, res) => {
 app.get('/projects/:id/edit', (req, res) => {
     if (!isAdmin(req)) return res.redirect('/');
     const project = db.query('SELECT * FROM projects WHERE id = ?').get(req.params.id);
-    res.render('edit', { item: project, type: 'project', user: req.user });
+    res.render('edit', { item: project, type: 'project', user: req.user, title: 'Edit Project' });
 });
 
 app.post('/projects/:id/edit', requireAdmin, (req, res) => {
@@ -532,7 +631,7 @@ app.post('/projects/:id/delete', requireAdmin, (req, res) => {
 
 // 404 Handler
 app.use((req, res) => {
-    res.status(404).render('404', { user: req.user, isAdmin: isAdmin(req) });
+    res.status(404).render('404', { user: req.user, isAdmin: isAdmin(req), title: 'Page Not Found' });
 });
 
 app.listen(PORT, () => {

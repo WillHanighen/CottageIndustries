@@ -3,7 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CottageIndustries</title>
+    
+    <% 
+        const siteTitle = typeof title !== 'undefined' && title ? `${title} | CottageIndustries` : 'CottageIndustries';
+        const siteDescription = typeof description !== 'undefined' && description ? description : 'A showcase of personal projects, experiments, and thoughts on technology. Exploring the intersection of code, design, and creativity.';
+        
+        let siteImage = typeof image !== 'undefined' && image ? image : '';
+        const siteUrl = typeof currentUrl !== 'undefined' ? currentUrl : '';
+        const siteType = typeof type !== 'undefined' ? type : 'website';
+
+        if (siteImage && siteImage.startsWith('/') && siteUrl) {
+             try {
+                const urlObj = new URL(siteUrl);
+                siteImage = `${urlObj.protocol}//${urlObj.host}${siteImage}`;
+             } catch (e) {
+                // Invalid URL, keep relative or ignore
+             }
+        }
+    %>
+
+    <title><%= siteTitle %></title>
+    <meta name="description" content="<%= siteDescription %>">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="<%= siteType %>">
+    <meta property="og:url" content="<%= siteUrl %>">
+    <meta property="og:title" content="<%= siteTitle %>">
+    <meta property="og:description" content="<%= siteDescription %>">
+    <% if (siteImage) { %>
+    <meta property="og:image" content="<%= siteImage %>">
+    <% } %>
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%= siteUrl %>">
+    <meta property="twitter:title" content="<%= siteTitle %>">
+    <meta property="twitter:description" content="<%= siteDescription %>">
+    <% if (siteImage) { %>
+    <meta property="twitter:image" content="<%= siteImage %>">
+    <% } %>
+
     <link href="/css/output.css" rel="stylesheet">
     <link href="/css/prism.css" rel="stylesheet">
     <link href="/css/prism-toolbar.css" rel="stylesheet">
