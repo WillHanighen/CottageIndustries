@@ -26,6 +26,9 @@ report.[0-9]_[0-9]_[0-9]_[0-9].json
 .env.*
 *.env
 
+#database
+*.db
+
 # caches
 .eslintcache
 .cache/

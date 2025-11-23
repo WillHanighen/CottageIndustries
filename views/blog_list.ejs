@@ -1,0 +1,54 @@
+<%- include('partials/header') %>
+
+<div class="relative isolate min-h-screen">
+    <!-- Fixed Background -->
+    <div class="fixed inset-0 -z-50">
+        <div class="absolute inset-0 bg-zinc-950"></div>
+        <div class="absolute top-0 right-0 w-[800px] h-[600px] bg-orange-500/5 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <!-- Vignette -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)] opacity-80 pointer-events-none"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 py-12 sm:py-20">
+        <div class="mb-16 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">All Blog Posts</h1>
+            <p class="text-zinc-400 text-lg max-w-2xl mx-auto">Thoughts, tutorials, and updates from my journey.</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-8 max-w-3xl mx-auto">
+            <% if (posts.length === 0) { %>
+                <div class="text-center py-24 border border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
+                    <p class="text-zinc-500">No blog posts yet.</p>
+                </div>
+            <% } %>
+
+            <% posts.forEach(post => { %>
+                <article class="group bg-zinc-900/40 backdrop-blur-sm border border-zinc-800/50 rounded-2xl p-8 hover:border-orange-500/30 transition-all duration-300 hover:bg-zinc-900/60">
+                    <div class="flex flex-col sm:flex-row gap-6">
+                        <div class="grow min-w-0">
+                            <div class="flex items-center gap-3 text-xs font-medium text-zinc-500 mb-3 uppercase tracking-wider">
+                                <time><%= new Date(post.created_at).toLocaleDateString() %></time>
+                                <span class="w-1 h-1 bg-zinc-700 rounded-full"></span>
+                                <span>Blog</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-orange-500 transition-colors"><%= post.title %></h3>
+                            <p class="text-zinc-400 line-clamp-3 mb-4 leading-relaxed break-words"><%- marked.parse(post.content).replace(/<[^>]*>/g, '') %></p>
+                            <a href="/blog/<%= post.id %>" class="inline-flex items-center text-sm font-medium text-orange-500 hover:text-orange-400 transition-colors">
+                                Read Article <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                        <% if (post.image) { %>
+                            <div class="shrink-0 sm:w-48 aspect-video sm:aspect-square rounded-xl overflow-hidden bg-zinc-800 border border-zinc-700/50">
+                                <img src="<%= post.image %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            </div>
+                        <% } %>
+                    </div>
+                </article>
+            <% }); %>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+

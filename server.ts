@@ -101,8 +101,18 @@ app.locals.marked = marked;
 // Routes
 app.get('/', (req, res) => {
     const posts = db.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT 5').all();
-    const projects = db.query('SELECT * FROM projects ORDER BY created_at DESC LIMIT 3').all();
+    const projects = db.query('SELECT * FROM projects ORDER BY featured DESC, created_at DESC LIMIT 3').all();
     res.render('index', { posts, projects, user: req.user, isAdmin: isAdmin(req) });
+});
+
+app.get('/blog', (req, res) => {
+    const posts = db.query('SELECT * FROM posts ORDER BY created_at DESC').all();
+    res.render('blog_list', { posts, user: req.user, isAdmin: isAdmin(req) });
+});
+
+app.get('/projects', (req, res) => {
+    const projects = db.query('SELECT * FROM projects ORDER BY featured DESC, created_at DESC').all();
+    res.render('project_list', { projects, user: req.user, isAdmin: isAdmin(req) });
 });
 
 // Auth Routes
@@ -204,8 +214,9 @@ app.post('/admin/post', (req, res) => {
 
 app.post('/admin/project', (req, res) => {
     if (!isAdmin(req)) return res.status(403).send('Unauthorized');
-    const { title, description, link, image } = req.body;
-    db.query('INSERT INTO projects (title, description, link, image) VALUES (?, ?, ?, ?)').run(title, description, link, image);
+    const { title, description, link, image, featured } = req.body;
+    const isFeatured = featured === 'on' ? 1 : 0;
+    db.query('INSERT INTO projects (title, description, link, image, featured) VALUES (?, ?, ?, ?, ?)').run(title, description, link, image, isFeatured);
     res.redirect('/admin');
 });
 
@@ -231,8 +242,9 @@ app.get('/projects/:id/edit', (req, res) => {
 
 app.post('/projects/:id/edit', (req, res) => {
     if (!isAdmin(req)) return res.status(403).send('Unauthorized');
-    const { title, description, link, image } = req.body;
-    db.query('UPDATE projects SET title = ?, description = ?, link = ?, image = ? WHERE id = ?').run(title, description, link, image, req.params.id);
+    const { title, description, link, image, featured } = req.body;
+    const isFeatured = featured === 'on' ? 1 : 0;
+    db.query('UPDATE projects SET title = ?, description = ?, link = ?, image = ?, featured = ? WHERE id = ?').run(title, description, link, image, isFeatured, req.params.id);
     res.redirect(`/projects/${req.params.id}`);
 });
 
