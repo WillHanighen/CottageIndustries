@@ -3,6 +3,11 @@ node_modules/
 bun.lockb
 .bun/
 
+# vendor/third-party libraries
+public/js/components/
+public/js/prism*.js
+public/css/prism*.css
+
 # output
 dist/
 build/

@@ -1,2 +1,30 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+/* Custom inline code style */
+:not(pre) > code {
+    @apply bg-zinc-800/50 text-orange-200 rounded px-1.5 py-0.5 font-mono text-[0.9em] border border-zinc-700/50;
+}
+
+/* Remove backticks from inline code in prose */
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+    content: "" !important;
+}
+
+/* Prism Toolbar Styling */
+div.code-toolbar > .toolbar {
+    opacity: 1 !important;
+    right: 0.7em !important;
+    top: 0.7em !important;
+}
+
+div.code-toolbar > .toolbar .toolbar-item {
+    display: inline-block;
+    margin-left: 0.5em;
+}
+
+div.code-toolbar > .toolbar .toolbar-item > span {
+    @apply text-xs font-mono font-medium text-zinc-400 bg-zinc-800/80 px-2 py-1 rounded border border-zinc-700 backdrop-blur-sm;
+    box-shadow: none;
+}
