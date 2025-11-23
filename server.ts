@@ -193,6 +193,20 @@ const isAdmin = (req: any) => {
     return req.user && req.user.email === ADMIN_EMAIL;
 };
 
+const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send('Unauthorized');
+    }
+    next();
+};
+
+const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (!isAdmin(req)) {
+        return res.status(403).send('Unauthorized');
+    }
+    next();
+};
+
 app.locals.marked = marked;
 
 // Routes
@@ -266,8 +280,7 @@ app.get('/projects/:id', (req, res) => {
 });
 
 // Comments & Reactions
-app.post('/comments', (req, res) => {
-    if (!req.user) return res.status(401).send('Unauthorized');
+app.post('/comments', requireAuth, (req, res) => {
     const { post_id, project_id, content } = req.body;
     const userId = (req.user as User).id;
     
@@ -280,8 +293,7 @@ app.post('/comments', (req, res) => {
     }
 });
 
-app.post('/comments/:id/delete', (req, res) => {
-    if (!req.user) return res.status(401).send('Unauthorized');
+app.post('/comments/:id/delete', requireAuth, (req, res) => {
     const commentId = req.params.id;
     const userId = (req.user as User).id;
     const isAdminUser = isAdmin(req);
@@ -304,8 +316,7 @@ app.post('/comments/:id/delete', (req, res) => {
     }
 });
 
-app.post('/comments/:id/edit', (req, res) => {
-    if (!req.user) return res.status(401).send('Unauthorized');
+app.post('/comments/:id/edit', requireAuth, (req, res) => {
     const commentId = req.params.id;
     const userId = (req.user as User).id;
     const { content } = req.body;
@@ -329,8 +340,7 @@ app.post('/comments/:id/edit', (req, res) => {
     }
 });
 
-app.post('/reactions', (req, res) => {
-    if (!req.user) return res.status(401).send('Unauthorized');
+app.post('/reactions', requireAuth, (req, res) => {
     const { target_id, target_type } = req.body;
     const userId = (req.user as User).id;
     
@@ -349,8 +359,7 @@ app.get('/account', (req, res) => {
     res.render('account', { user: req.user, isAdmin: isAdmin(req) });
 });
 
-app.post('/account', upload.single('avatar'), async (req, res) => {
-    if (!req.user) return res.status(401).send('Unauthorized');
+app.post('/account', requireAuth, upload.single('avatar'), async (req, res) => {
     const { username } = req.body;
     const userId = (req.user as User).id;
     let avatarUrl = (req.user as User).avatar; // Default to existing avatar
@@ -376,8 +385,7 @@ app.post('/account', upload.single('avatar'), async (req, res) => {
     res.redirect('/account');
 });
 
-app.post('/accept-tos', (req, res) => {
-    if (!req.user) return res.status(401).send('Unauthorized');
+app.post('/accept-tos', requireAuth, (req, res) => {
     const userId = (req.user as User).id;
     const now = new Date().toISOString();
     
@@ -389,8 +397,7 @@ app.post('/accept-tos', (req, res) => {
     res.redirect(req.header('Referer') || '/');
 });
 
-app.post('/delete-account', (req, res) => {
-    if (!req.user) return res.status(401).send('Unauthorized');
+app.post('/delete-account', requireAuth, (req, res) => {
     const userId = (req.user as User).id;
     
     // Delete user data (comments, reactions, user record)
@@ -426,15 +433,13 @@ app.get('/admin', (req, res) => {
     res.render('admin', { posts, projects, user: req.user });
 });
 
-app.post('/admin/post', (req, res) => {
-    if (!isAdmin(req)) return res.status(403).send('Unauthorized');
+app.post('/admin/post', requireAdmin, (req, res) => {
     const { title, content, image } = req.body;
     db.query('INSERT INTO posts (title, content, image) VALUES (?, ?, ?)').run(title, content, image);
     res.redirect('/admin');
 });
 
-app.post('/admin/project', (req, res) => {
-    if (!isAdmin(req)) return res.status(403).send('Unauthorized');
+app.post('/admin/project', requireAdmin, (req, res) => {
     const { title, description, link, image, featured } = req.body;
     const isFeatured = featured === 'on' ? 1 : 0;
     db.query('INSERT INTO projects (title, description, link, image, featured) VALUES (?, ?, ?, ?, ?)').run(title, description, link, image, isFeatured);
@@ -448,11 +453,23 @@ app.get('/blog/:id/edit', (req, res) => {
     res.render('edit', { item: post, type: 'post', user: req.user });
 });
 
-app.post('/blog/:id/edit', (req, res) => {
-    if (!isAdmin(req)) return res.status(403).send('Unauthorized');
+app.post('/blog/:id/edit', requireAdmin, (req, res) => {
     const { title, content, image } = req.body;
     db.query('UPDATE posts SET title = ?, content = ?, image = ? WHERE id = ?').run(title, content, image, req.params.id);
     res.redirect(`/blog/${req.params.id}`);
+});
+
+app.post('/blog/:id/delete', requireAdmin, (req, res) => {
+    const postId = req.params.id;
+    
+    // Delete related data
+    db.query('DELETE FROM comments WHERE post_id = ?').run(postId);
+    db.query('DELETE FROM reactions WHERE target_type = ? AND target_id = ?').run('post', postId);
+    
+    // Delete post
+    db.query('DELETE FROM posts WHERE id = ?').run(postId);
+    
+    res.redirect('/blog'); // Or /admin
 });
 
 app.get('/projects/:id/edit', (req, res) => {
@@ -461,12 +478,24 @@ app.get('/projects/:id/edit', (req, res) => {
     res.render('edit', { item: project, type: 'project', user: req.user });
 });
 
-app.post('/projects/:id/edit', (req, res) => {
-    if (!isAdmin(req)) return res.status(403).send('Unauthorized');
+app.post('/projects/:id/edit', requireAdmin, (req, res) => {
     const { title, description, link, image, featured } = req.body;
     const isFeatured = featured === 'on' ? 1 : 0;
     db.query('UPDATE projects SET title = ?, description = ?, link = ?, image = ?, featured = ? WHERE id = ?').run(title, description, link, image, isFeatured, req.params.id);
     res.redirect(`/projects/${req.params.id}`);
+});
+
+app.post('/projects/:id/delete', requireAdmin, (req, res) => {
+    const projectId = req.params.id;
+    
+    // Delete related data
+    db.query('DELETE FROM comments WHERE project_id = ?').run(projectId);
+    db.query('DELETE FROM reactions WHERE target_type = ? AND target_id = ?').run('project', projectId);
+    
+    // Delete project
+    db.query('DELETE FROM projects WHERE id = ?').run(projectId);
+    
+    res.redirect('/projects'); // Or /admin
 });
 
 app.listen(PORT, () => {
