@@ -524,6 +524,11 @@ app.post('/projects/:id/delete', requireAdmin, (req, res) => {
     res.redirect('/projects'); // Or /admin
 });
 
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).render('404', { user: req.user, isAdmin: isAdmin(req) });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
