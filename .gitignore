@@ -34,6 +34,7 @@ public/uploads/avatars/**
 .env
 .env.*
 *.env
+!.env.example
 
 #database
 *.db
