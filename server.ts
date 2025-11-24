@@ -37,7 +37,10 @@ const limiter = rateLimit({
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
-app.use(limiter);
+
+if (process.env.NODE_ENV !== 'development') {
+    app.use(limiter);
+}
 
 // Configure Multer
 const storage = multer.memoryStorage();
@@ -631,7 +634,14 @@ app.post('/projects/:id/delete', requireAdmin, (req, res) => {
 
 // 404 Handler
 app.use((req, res) => {
-    res.status(404).render('404', { user: req.user, isAdmin: isAdmin(req), title: 'Page Not Found' });
+    // 1 in 20 chance (5%) to show Silver
+    const showSilver = Math.random() < 0.05;
+    res.status(404).render('404', { 
+        user: req.user, 
+        isAdmin: isAdmin(req), 
+        title: 'Page Not Found',
+        showSilver
+    });
 });
 
 app.listen(PORT, () => {

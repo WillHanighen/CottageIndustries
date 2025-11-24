@@ -7,19 +7,9 @@
     <% 
         const siteTitle = typeof title !== 'undefined' && title ? `${title} | CottageIndustries` : 'CottageIndustries';
         const siteDescription = typeof description !== 'undefined' && description ? description : 'A showcase of personal projects, experiments, and thoughts on technology. Exploring the intersection of code, design, and creativity.';
-        
-        let siteImage = typeof image !== 'undefined' && image ? image : '';
+        const siteImage = typeof image !== 'undefined' && image ? image : '/images/og-default.png';
         const siteUrl = typeof currentUrl !== 'undefined' ? currentUrl : '';
         const siteType = typeof type !== 'undefined' ? type : 'website';
-
-        if (siteImage && siteImage.startsWith('/') && siteUrl) {
-             try {
-                const urlObj = new URL(siteUrl);
-                siteImage = `${urlObj.protocol}//${urlObj.host}${siteImage}`;
-             } catch (e) {
-                // Invalid URL, keep relative or ignore
-             }
-        }
     %>
 
     <title><%= siteTitle %></title>

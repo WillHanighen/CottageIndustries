@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Custom Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-in {
+  animation-duration: 1000ms;
+  animation-fill-mode: forwards;
+}
+
+.fade-in {
+  animation-name: fade-in;
+}
+
 /* Custom inline code style */
 :not(pre) > code {
     @apply bg-zinc-800/50 text-orange-200 rounded px-1.5 py-0.5 font-mono text-[0.9em] border border-zinc-700/50;
