@@ -43,21 +43,21 @@ docker run -p 3000:3000 \
 
 The application is configured via the `.env` file. Ensure the following variables are set:
 
-# Required
+## Required
 
 NODE_ENV        Set to "production" in deployment for security features.
 SESSION_SECRET  Long random string used to sign sessions.
 ADMIN_EMAIL     Email for the site’s admin user.
 
-# Server
+## Server
 
 PORT            Defaults to 3000 if not set.
 
-# Database
+## Database
 
 DB_PATH         Path to SQLite file. Defaults to ./database.db.
 
-# OAuth (required if enabling login)
+## OAuth (required if enabling login)
 
 GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
