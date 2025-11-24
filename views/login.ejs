@@ -48,47 +48,69 @@
                     <% const hasProviders = googleEnabled || githubEnabled; %>
                     
                     <% if (hasProviders) { %>
+                        <!-- Turnstile Script -->
+                        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                        <script>
+                            function turnstileCallback(token) {
+                                document.querySelectorAll('input[name="cf-turnstile-response"]').forEach(input => {
+                                    input.value = token;
+                                });
+                                document.querySelectorAll('button.auth-btn').forEach(btn => {
+                                    btn.disabled = false;
+                                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                });
+                            }
+                        </script>
+
                         <div class="space-y-4">
+                            <!-- Turnstile Widget -->
+                            <div class="flex justify-center mb-4">
+                                <div class="cf-turnstile" data-sitekey="<%= turnstileSiteKey %>" data-callback="turnstileCallback" data-theme="dark"></div>
+                            </div>
+
                             <% if (githubEnabled) { %>
-                                <a href="/auth/github" class="group flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg bg-[#24292F] hover:bg-[#24292F]/90 text-white font-medium text-sm transition-all shadow-lg shadow-black/20 border border-transparent hover:scale-[1.02] active:scale-[0.98]">
-                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.93c.58.11.79-.25.79-.55v-2.1c-3.2.7-3.87-1.54-3.87-1.54-.53-1.33-1.3-1.69-1.3-1.69-1.07-.74.08-.73.08-.73 1.18.08 1.81 1.22 1.81 1.22 1.05 1.8 2.75 1.28 3.43.98.11-.76.41-1.28.74-1.58-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.27 1.2-3.06-.12-.29-.52-1.46.12-3.04 0 0 .97-.31 3.17 1.17a10.9 10.9 0 0 1 5.78 0c2.2-1.48 3.16-1.17 3.16-1.17.64 1.58.24 2.75.12 3.04.75.79 1.2 1.81 1.2 3.06 0 4.41-2.68 5.38-5.24 5.66.42.36.79 1.07.79 2.16v3.2c0 .31.21.67.8.55A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path>
-                                    </svg>
-                                    Continue with GitHub
-                                </a>
+                                <form action="/auth/github" method="POST">
+                                    <input type="hidden" name="cf-turnstile-response">
+                                    <button type="submit" disabled class="auth-btn opacity-50 cursor-not-allowed group flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg bg-[#24292F] hover:bg-[#24292F]/90 text-white font-medium text-sm transition-all shadow-lg shadow-black/20 border border-transparent hover:scale-[1.02] active:scale-[0.98]">
+                                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.93c.58.11.79-.25.79-.55v-2.1c-3.2.7-3.87-1.54-3.87-1.54-.53-1.33-1.3-1.69-1.3-1.69-1.07-.74.08-.73.08-.73 1.18.08 1.81 1.22 1.81 1.22 1.05 1.8 2.75 1.28 3.43.98.11-.76.41-1.28.74-1.58-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.27 1.2-3.06-.12-.29-.52-1.46.12-3.04 0 0 .97-.31 3.17 1.17a10.9 10.9 0 0 1 5.78 0c2.2-1.48 3.16-1.17 3.16-1.17.64 1.58.24 2.75.12 3.04.75.79 1.2 1.81 1.2 3.06 0 4.41-2.68 5.38-5.24 5.66.42.36.79 1.07.79 2.16v3.2c0 .31.21.67.8.55A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path>
+                                        </svg>
+                                        Continue with GitHub
+                                    </button>
+                                </form>
                             <% } %>
                             
                             <% if (googleEnabled) { %>
-                                <a href="/auth/google" class="group flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg bg-white hover:bg-zinc-50 text-zinc-900 font-medium text-sm transition-all shadow-lg shadow-black/5 border border-transparent hover:scale-[1.02] active:scale-[0.98]">
-                                    <svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                                        <path fill="#EA4335" d="M12 4.66c1.6 0 3.04.55 4.19 1.6l3.14-3.14C17.46 1.05 14.98 0 12 0 7.7 0 3.99 2.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                                    </svg>
-                                    Continue with Google
-                                </a>
+                                <form action="/auth/google" method="POST">
+                                    <input type="hidden" name="cf-turnstile-response">
+                                    <button type="submit" disabled class="auth-btn opacity-50 cursor-not-allowed group flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg bg-white hover:bg-zinc-50 text-zinc-900 font-medium text-sm transition-all shadow-lg shadow-black/5 border border-transparent hover:scale-[1.02] active:scale-[0.98]">
+                                        <svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                            <path fill="#EA4335" d="M12 4.66c1.6 0 3.04.55 4.19 1.6l3.14-3.14C17.46 1.05 14.98 0 12 0 7.7 0 3.99 2.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                        </svg>
+                                        Continue with Google
+                                    </button>
+                                </form>
                             <% } %>
                         </div>
 
-                        <div class="mt-8 text-center">
-                            <div class="relative">
-                                <div class="absolute inset-0 flex items-center">
-                                    <div class="w-full border-t border-zinc-800"></div>
-                                </div>
-                                <div class="relative flex justify-center text-xs uppercase">
-                                    <span class="bg-zinc-900 px-2 text-zinc-500">Secured by OAuth</span>
-                                </div>
-                            </div>
-                            <p class="mt-6 text-xs text-zinc-600 max-w-xs mx-auto">
-                                New here? Logging in will automatically create an account for you.
-                                <br><br>
-                                By continuing, you agree to CottageIndustries'
-                                <a href="/tos" class="text-orange-500 hover:text-orange-400 transition-colors">Terms of Service</a>
-                                and
-                                <a href="/privacy" class="text-orange-500 hover:text-orange-400 transition-colors">Privacy Policy</a>.
+                        <div class="mt-8 text-center text-xs text-zinc-600 max-w-xs mx-auto space-y-4 leading-relaxed">
+
+                            <p>
+                              New here? Logging in will automatically create an account for you.
                             </p>
-                        </div>
+                          
+                            <p>
+                              By continuing, you agree to CottageIndustries'
+                              <a href="/tos" class="text-orange-500 hover:text-orange-400 transition-colors">Terms of Service</a>
+                              and
+                              <a href="/privacy" class="text-orange-500 hover:text-orange-400 transition-colors">Privacy Policy</a>.
+                            </p>
+                          
+                          </div>
+                          
 
                         <!-- Onboarding Preview (Hidden functionality for now, visual only) -->
                         <div class="mt-8 pt-6 border-t border-zinc-800/50 text-left">

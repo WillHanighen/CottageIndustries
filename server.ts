@@ -14,6 +14,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import db from './database';
+import BunSQLiteStore from './sessionStore';
 
 dotenv.config();
 
@@ -68,11 +69,18 @@ const TOS_UPDATED_AT = '2023-11-23'; // Update this date when TOS/Privacy change
 
 // Passport Setup
 passport.serializeUser((user: any, done) => {
+    console.log('[Passport] Serializing user:', user.id);
     done(null, user.id);
 });
 
 passport.deserializeUser((id: number, done) => {
+    console.log('[Passport] Deserializing user:', id);
     const user = db.query('SELECT * FROM users WHERE id = ?').get(id) as User | null;
+    if (user) {
+        // console.log('[Passport] User found');
+    } else {
+        console.log('[Passport] User NOT found for ID:', id);
+    }
     done(null, user);
 });
 
@@ -82,6 +90,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: "/auth/google/callback"
     }, (accessToken, refreshToken, profile, done) => {
+        console.log('[GoogleStrategy] Callback started. Profile ID:', profile.id);
         const email = profile.emails?.[0]?.value || '';
         const avatar = profile.photos?.[0]?.value || '';
         const providerId = profile.id;
@@ -93,14 +102,17 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
         if (credential) {
             // Found existing link, get user
+            console.log('[GoogleStrategy] Credential found:', credential.id);
             user = db.query('SELECT * FROM users WHERE id = ?').get(credential.user_id) as User;
         } else {
+            console.log('[GoogleStrategy] Credential NOT found. Checking email...');
             // No direct link found. Check for existing user by email.
             if (email) {
                  user = db.query('SELECT * FROM users WHERE email = ?').get(email) as User;
             }
 
             if (user) {
+                console.log('[GoogleStrategy] User found by email:', user.id);
                 // User exists with this email, link this new provider to them
                 try {
                      db.query('INSERT INTO federated_credentials (user_id, provider, provider_id) VALUES (?, ?, ?)').run(user.id, provider, providerId);
@@ -108,6 +120,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                     console.error('Error linking account:', err);
                 }
             } else {
+                console.log('[GoogleStrategy] Creating new user...');
                 // No user found, create new user and link
                 const now = new Date().toISOString();
                 
@@ -125,6 +138,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 }
             }
         }
+        console.log('[GoogleStrategy] Done. User ID:', user?.id);
         return done(null, user);
     }));
 }
@@ -135,6 +149,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
         callbackURL: "/auth/github/callback"
     }, (accessToken: string, refreshToken: string, profile: any, done: any) => {
+        console.log('[GitHubStrategy] Callback started. Profile ID:', profile.id);
         const email = profile.emails?.[0]?.value || ''; // GitHub might not provide email publicly
         const avatar = profile.photos?.[0]?.value || '';
         const providerId = profile.id;
@@ -146,14 +161,17 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
 
         if (credential) {
             // Found existing link, get user
+            console.log('[GitHubStrategy] Credential found:', credential.id);
             user = db.query('SELECT * FROM users WHERE id = ?').get(credential.user_id) as User;
         } else {
+            console.log('[GitHubStrategy] Credential NOT found.');
             // No direct link found. Check for existing user by email.
             if (email) {
                  user = db.query('SELECT * FROM users WHERE email = ?').get(email) as User;
             }
 
             if (user) {
+                console.log('[GitHubStrategy] User found by email:', user.id);
                 // User exists with this email, link this new provider to them
                 try {
                      db.query('INSERT INTO federated_credentials (user_id, provider, provider_id) VALUES (?, ?, ?)').run(user.id, provider, providerId);
@@ -161,6 +179,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
                     console.error('Error linking account:', err);
                 }
             } else {
+                console.log('[GitHubStrategy] Creating new user...');
                 // No user found, create new user and link
                 const now = new Date().toISOString();
                 
@@ -173,6 +192,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
                 }
             }
         }
+        console.log('[GitHubStrategy] Done. User ID:', user?.id);
         return done(null, user);
     }));
 }
@@ -184,11 +204,12 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 app.use(session({
+    store: new BunSQLiteStore(),
     secret: process.env.SESSION_SECRET || 'secret_key',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production' && process.env.PROTOCOL === 'https',
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
@@ -237,6 +258,42 @@ const requireAdmin = (req: express.Request, res: express.Response, next: express
     next();
 };
 
+const verifyTurnstile = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const token = req.body['cf-turnstile-response'];
+    const secretKey = process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
+
+    if (!token) {
+        // If strictly enforcing, fail.
+        // However, for dev/testing without keys, maybe we want to be lenient?
+        // No, the user asked for it.
+        return res.status(400).send('Turnstile verification required. Please try again.');
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('secret', secretKey);
+        formData.append('response', token);
+        formData.append('remoteip', req.ip || '');
+
+        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json() as any;
+
+        if (data.success) {
+            next();
+        } else {
+            console.error('Turnstile validation failed:', data);
+            res.status(403).send('Security check failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Turnstile error:', error);
+        res.status(500).send('Security check error');
+    }
+};
+
 app.locals.marked = marked;
 
 // Routes
@@ -269,35 +326,60 @@ app.get('/projects', (req, res) => {
 });
 
 // Auth Routes
+app.get('/debug-session', (req, res) => {
+    res.json({
+        sessionID: req.sessionID,
+        user: req.user,
+        isAuthenticated: req.isAuthenticated(),
+        cookie: req.session.cookie,
+        headers: req.headers,
+        env: {
+            NODE_ENV: process.env.NODE_ENV,
+            protocol: req.protocol,
+            secure: req.secure,
+            host: req.get('host')
+        }
+    });
+});
+
 app.get('/login', (req, res) => {
     res.render('login', { 
         user: req.user,
         googleEnabled: !!process.env.GOOGLE_CLIENT_ID,
         githubEnabled: !!process.env.GITHUB_CLIENT_ID,
         adminEmail: ADMIN_EMAIL,
+        turnstileSiteKey: process.env.TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
         title: 'Login'
     });
 });
 
-app.get('/auth/google', (req, res, next) => {
+app.post('/auth/google', verifyTurnstile, (req, res, next) => {
     if (!process.env.GOOGLE_CLIENT_ID) return res.status(500).send('Google Auth not configured');
     passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
 });
 
 app.get('/auth/google/callback', (req, res, next) => {
+    console.log('[Auth] Google callback received. Query:', req.query);
     if (!process.env.GOOGLE_CLIENT_ID) return res.redirect('/login');
     passport.authenticate('google', { failureRedirect: '/login' })(req, res, next);
-}, (req, res) => res.redirect('/'));
+}, (req, res) => {
+    console.log('[Auth] Google auth successful. User:', (req.user as any)?.id);
+    res.redirect('/');
+});
 
-app.get('/auth/github', (req, res, next) => {
+app.post('/auth/github', verifyTurnstile, (req, res, next) => {
     if (!process.env.GITHUB_CLIENT_ID) return res.status(500).send('GitHub Auth not configured');
     passport.authenticate('github', { scope: ['user:email'] })(req, res, next);
 });
 
 app.get('/auth/github/callback', (req, res, next) => {
+    console.log('[Auth] GitHub callback received. Query:', req.query);
     if (!process.env.GITHUB_CLIENT_ID) return res.redirect('/login');
     passport.authenticate('github', { failureRedirect: '/login' })(req, res, next);
-}, (req, res) => res.redirect('/'));
+}, (req, res) => {
+    console.log('[Auth] GitHub auth successful. User:', (req.user as any)?.id);
+    res.redirect('/');
+});
 
 app.get('/logout', (req, res) => {
     req.logout(() => {

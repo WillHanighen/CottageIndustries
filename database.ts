@@ -42,6 +42,7 @@ db.run(`
         description TEXT,
         link TEXT,
         image TEXT,
+        featured INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -64,6 +65,12 @@ db.run(`
         target_id INTEGER,
         type TEXT, -- 'like', 'love', etc.
         UNIQUE(user_id, target_type, target_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+        sid TEXT PRIMARY KEY,
+        sess TEXT,
+        expired INTEGER
     );
 `);
 
