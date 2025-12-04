@@ -22,6 +22,68 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
+// Sitemap Route (Bypass all middleware)
+app.get('/sitemap.xml', (req, res) => {
+    const posts = db.query('SELECT id, created_at FROM posts').all() as any[];
+    const projects = db.query('SELECT id, created_at FROM projects').all() as any[];
+    
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    
+    interface SitemapUrl {
+        url: string;
+        changefreq: string;
+        priority: number;
+        lastmod?: string;
+    }
+
+    const urls: SitemapUrl[] = [
+        { url: '/', changefreq: 'daily', priority: 1.0 },
+        { url: '/blog', changefreq: 'daily', priority: 0.8 },
+        { url: '/projects', changefreq: 'weekly', priority: 0.8 },
+        { url: '/about', changefreq: 'monthly', priority: 0.5 },
+        { url: '/privacy', changefreq: 'yearly', priority: 0.3 },
+        { url: '/tos', changefreq: 'yearly', priority: 0.3 },
+        { url: '/login', changefreq: 'monthly', priority: 0.3 },
+    ];
+
+    // Add Blog Posts
+    posts.forEach(post => {
+        urls.push({
+            url: `/blog/${post.id}`,
+            changefreq: 'weekly',
+            priority: 0.7,
+            lastmod: new Date(post.created_at).toISOString()
+        });
+    });
+
+    // Add Projects
+    projects.forEach(project => {
+        urls.push({
+            url: `/projects/${project.id}`,
+            changefreq: 'weekly',
+            priority: 0.7,
+            lastmod: new Date(project.created_at).toISOString()
+        });
+    });
+
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    ${urls.map(u => `
+    <url>
+        <loc>${baseUrl}${u.url}</loc>
+        <changefreq>${u.changefreq}</changefreq>
+        <priority>${u.priority}</priority>
+        ${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}
+    </url>
+    `).join('')}
+</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.header('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; img-src data:;");
+    res.header('X-Content-Type-Options', 'nosniff');
+    res.send(sitemap);
+});
+
 // Security & Performance Middleware
 if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1); // Trust first proxy
@@ -567,65 +629,6 @@ app.post('/delete-account', requireAuth, (req, res) => {
     });
 });
 
-// Static Pages
-app.get('/sitemap.xml', (req, res) => {
-    const posts = db.query('SELECT id, created_at FROM posts').all() as any[];
-    const projects = db.query('SELECT id, created_at FROM projects').all() as any[];
-    
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    
-    interface SitemapUrl {
-        url: string;
-        changefreq: string;
-        priority: number;
-        lastmod?: string;
-    }
-
-    const urls: SitemapUrl[] = [
-        { url: '/', changefreq: 'daily', priority: 1.0 },
-        { url: '/blog', changefreq: 'daily', priority: 0.8 },
-        { url: '/projects', changefreq: 'weekly', priority: 0.8 },
-        { url: '/about', changefreq: 'monthly', priority: 0.5 },
-        { url: '/privacy', changefreq: 'yearly', priority: 0.3 },
-        { url: '/tos', changefreq: 'yearly', priority: 0.3 },
-        { url: '/login', changefreq: 'monthly', priority: 0.3 },
-    ];
-
-    // Add Blog Posts
-    posts.forEach(post => {
-        urls.push({
-            url: `/blog/${post.id}`,
-            changefreq: 'weekly',
-            priority: 0.7,
-            lastmod: new Date(post.created_at).toISOString()
-        });
-    });
-
-    // Add Projects
-    projects.forEach(project => {
-        urls.push({
-            url: `/projects/${project.id}`,
-            changefreq: 'weekly',
-            priority: 0.7,
-            lastmod: new Date(project.created_at).toISOString()
-        });
-    });
-
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    ${urls.map(u => `
-    <url>
-        <loc>${baseUrl}${u.url}</loc>
-        <changefreq>${u.changefreq}</changefreq>
-        <priority>${u.priority}</priority>
-        ${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}
-    </url>
-    `).join('')}
-</urlset>`;
-
-    res.header('Content-Type', 'application/xml');
-    res.send(sitemap);
-});
 
 app.get('/tos', (req, res) => {
     res.render('tos', { user: req.user, isAdmin: isAdmin(req), title: 'Terms of Service' });
